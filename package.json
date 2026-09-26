@@ -4,7 +4,7 @@
   "description": "TalentSphere — Intelligent Campus Recruitment & Career Management platform",
   "scripts": {
     "install:all": "npm --prefix server install && npm --prefix client install",
-    "build": "npm --prefix client run build",
+    "build": "npm --prefix client install && npm --prefix client run build",
     "seed": "npm --prefix server run seed",
     "server": "npm --prefix server run dev",
     "client": "npm --prefix client run dev"
