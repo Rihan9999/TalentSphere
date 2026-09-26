@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Try loading .env from server dir, root dir, and CWD
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
 let isConnected = false;
@@ -33,9 +42,8 @@ export const connectDB = async () => {
     console.warn('[DB] MongoMemoryServer not available or binary download failed:', memErr.message);
   }
 
-  // Final fallback: Disable Mongoose query buffering so app doesn't hang
-  mongoose.set('bufferCommands', false);
-  console.warn('⚠️ [DB] Warning: Operating without active MongoDB connection. Start mongod for live database persistence.');
+  console.warn('⚠️ [DB] Warning: Unable to connect to MongoDB Atlas cluster or local MongoDB instance.');
+  console.warn('📌 Atlas Tip: Please whitelist your IP address (or 0.0.0.0/0) in MongoDB Atlas -> Network Access -> Add IP Address.');
 };
 
 export const getDbStatus = () => ({
