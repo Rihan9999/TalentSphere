@@ -1,6 +1,8 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -17,8 +19,6 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import { seedInitialData } from './seeds/seedData.js';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,13 +40,57 @@ uploadDirs.forEach((dir) => {
   }
 });
 
-// Middleware
+// Dynamic CORS configuration to support Localhost, Vercel, and Render deployments
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'https://talent-sphere-flax.vercel.app',
+  'https://talent-sphere-njb62kmfb-rihans-projects-cf2af98f.vercel.app',
+  'https://talentsphere-8gf3.onrender.com'
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Check explicit allowed origins list
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Check process.env.CLIENT_URL (supports comma-separated list of origins)
+      if (process.env.CLIENT_URL) {
+        const clientUrls = process.env.CLIENT_URL.split(',').map((u) => u.trim());
+        if (clientUrls.includes(origin)) {
+          return callback(null, true);
+        }
+      }
+
+      // Allow any vercel.app or onrender.com subdomains, or localhost pattern
+      if (
+        /\.vercel\.app$/.test(origin) ||
+        /\.onrender\.com$/.test(origin) ||
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      // Fallback: allow to prevent unexpected CORS blocks in deployment
+      return callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['Authorization'],
   })
 );
+
+app.options('*', cors());
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));

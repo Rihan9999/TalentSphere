@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'talentsphere_super_secret_jwt_key_2025';
+export const getJwtSecret = () => process.env.JWT_SECRET || 'talentsphere_super_secret_jwt_key_2025_secure';
 
 export const verifyToken = async (req, res, next) => {
   try {
@@ -18,7 +18,7 @@ export const verifyToken = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Access denied. No authentication token provided.' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     const user = await User.findById(decoded.userId).select('-password');
 
     if (!user) {

@@ -4,12 +4,12 @@ import Student from '../models/Student.js';
 import Staff from '../models/Staff.js';
 import Recruiter from '../models/Recruiter.js';
 import Company from '../models/Company.js';
-import { JWT_SECRET } from '../middleware/auth.js';
+import { getJwtSecret } from '../middleware/auth.js';
 import { logAuditAction } from '../middleware/audit.js';
 
 // Helper to sign JWT
 const generateToken = (userId, role) => {
-  return jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: '7d' });
+  return jwt.sign({ userId, role }, getJwtSecret(), { expiresIn: '7d' });
 };
 
 /**
